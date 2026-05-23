@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fsrs-app-v1';
+const CACHE_NAME = 'fsrs-app-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const ASSETS = [
   './js/views/editor.js',
   './js/views/review.js',
   './js/views/settings.js',
+  './js/views/typing.js',
+  './decks/hsk1-mandarim.deck.json',
   './js/components/card-renderer.js',
   './js/components/modal.js',
   './js/components/toast.js',
