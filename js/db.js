@@ -157,6 +157,7 @@ export async function exportDeck(libraryId) {
     cards: cards.map(c => ({
       front: c.front,
       back: c.back,
+      explanation: c.explanation || '',
       tags: c.tags || []
     }))
   };
@@ -197,6 +198,7 @@ export async function importDeck(data, mode = 'new') {
       libraryId,
       front: card.front,
       back: card.back,
+      explanation: card.explanation || '',
       tags: card.tags || []
     });
   }
