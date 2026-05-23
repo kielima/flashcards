@@ -55,13 +55,13 @@ export async function render(libraryId, cardId) {
     </div>
   `;
 
-  // Current tags state
-  let currentTags = [...(card?.tags || [])];
-  renderTags(currentTags);
-
   // Tag input handling
   const tagInput = document.getElementById('tag-input');
   const wrapper = document.getElementById('tags-wrapper');
+
+  // Current tags state
+  let currentTags = [...(card?.tags || [])];
+  renderTags(currentTags);
 
   wrapper.addEventListener('click', () => tagInput.focus());
 
@@ -134,14 +134,19 @@ export async function render(libraryId, cardId) {
 
     const data = { front, back, tags: currentTags, libraryId: Number(libraryId) };
 
-    if (isEdit) {
-      await updateCard(cardId, data);
-      showToast('Card salvo');
-    } else {
-      await createCard(data);
-      showToast('Card criado!', 'success');
+    try {
+      if (isEdit) {
+        await updateCard(cardId, data);
+        showToast('Card salvo', 'success');
+      } else {
+        await createCard(data);
+        showToast('Card criado!', 'success');
+      }
+      location.hash = `#/library/${libraryId}`;
+    } catch (e) {
+      console.error('Erro ao salvar card:', e);
+      showToast('Erro ao salvar card', 'error');
     }
-    location.hash = `#/library/${libraryId}`;
   });
 
   // Delete
