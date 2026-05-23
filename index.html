@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#5B6EF5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>FSRS Flashcards</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+  <link rel="stylesheet" href="./css/app.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "ts-fsrs": "https://cdn.jsdelivr.net/npm/ts-fsrs@4/+esm",
+      "dexie": "https://cdn.jsdelivr.net/npm/dexie@4/+esm",
+      "marked": "https://cdn.jsdelivr.net/npm/marked@12/+esm",
+      "katex": "https://cdn.jsdelivr.net/npm/katex@0.16/+esm"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <div id="view-container"></div>
+  </div>
+  <div id="modal-container"></div>
+  <div id="toast-container"></div>
+  <script type="module" src="./js/ui.js"></script>
+</body>
+</html>

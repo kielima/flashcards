@@ -1,0 +1,9 @@
+{
+  "name": "FSRS Flashcards",
+  "short_name": "Flashcards",
+  "description": "Flashcards pessoais com algoritmo FSRS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f13",
+  "theme_color": "#5B6EF5"
+}
