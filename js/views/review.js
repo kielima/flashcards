@@ -31,6 +31,7 @@ export async function render(libraryId) {
 
   let current = 0;
   let answered = false;
+  let waitingForContinue = false;
   const results = { again: 0, hard: 0, good: 0, easy: 0 };
 
   function showCard() {
@@ -40,6 +41,7 @@ export async function render(libraryId) {
     }
 
     answered = false;
+    waitingForContinue = false;
     const { card, review } = queue[current];
     const intervals = previewIntervals(review);
     const total = queue.length;
@@ -55,11 +57,21 @@ export async function render(libraryId) {
           <span class="progress-label">${current + 1} / ${total}</span>
         </div>
 
-        <div class="review-card-area">
+        <div class="review-card-area" id="review-card-area">
           <div class="review-card">
             <div class="review-front rendered" id="review-front"></div>
             <div class="review-divider" id="review-divider"></div>
-            <div class="review-back" id="review-back"></div>
+            <div class="review-back" id="review-back">
+              <div class="answer-section rendered" id="answer-content"></div>
+              <div class="explanation-handle" id="explanation-handle">
+                <span class="handle-pill"></span>
+                <span class="handle-text">puxar para ver explicação</span>
+              </div>
+              <div class="explanation-wrapper" id="explanation-wrapper">
+                <div class="explanation-label">Explicação</div>
+                <div class="rendered" id="explanation-content"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -105,10 +117,55 @@ export async function render(libraryId) {
 
     const back = document.getElementById('review-back');
     back.classList.add('visible');
-    renderInto(back, card.back);
+    renderInto(document.getElementById('answer-content'), card.back);
+
+    if (card.explanation) {
+      document.getElementById('explanation-handle').classList.add('visible');
+      setupSwipeReveal(card);
+    }
+  }
+
+  function revealExplanation() {
+    const wrapper = document.getElementById('explanation-wrapper');
+    if (wrapper.classList.contains('visible')) return;
+    document.getElementById('explanation-handle').classList.remove('visible');
+    wrapper.classList.add('visible');
+    renderInto(document.getElementById('explanation-content'), queue[current].card.explanation);
+  }
+
+  function setupSwipeReveal(card) {
+    if (!card.explanation) return;
+    const area = document.getElementById('review-card-area');
+    let startY = 0;
+    const onTouchStart = (e) => { startY = e.touches[0].clientY; };
+    const onTouchEnd = (e) => {
+      if (e.changedTouches[0].clientY - startY < -40) revealExplanation();
+    };
+    area.addEventListener('touchstart', onTouchStart, { passive: true });
+    area.addEventListener('touchend', onTouchEnd, { passive: true });
+    document.getElementById('explanation-handle').addEventListener('click', revealExplanation);
   }
 
   async function rate(rating) {
+    const { card, review, isNew } = queue[current];
+
+    if (rating === Rating.Again && card.explanation) {
+      waitingForContinue = true;
+      revealExplanation();
+      document.getElementById('rating-buttons').style.display = 'none';
+      const footer = document.querySelector('.review-footer');
+      const continueBtn = document.createElement('button');
+      continueBtn.className = 'btn btn-primary show-answer-btn';
+      continueBtn.textContent = 'Continuar';
+      footer.appendChild(continueBtn);
+      continueBtn.addEventListener('click', () => advanceCard(rating));
+      return;
+    }
+
+    await advanceCard(rating);
+  }
+
+  async function advanceCard(rating) {
     const { card, review, isNew } = queue[current];
     const newState = scheduleCard(review, rating);
 
@@ -128,11 +185,14 @@ export async function render(libraryId) {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         if (!answered) revealAnswer();
-      } else if (answered) {
+      } else if (answered && !waitingForContinue) {
         if (e.key === '1') rate(Rating.Again);
-        else if (e.key === '2') rate(Rating.Hard);
-        else if (e.key === '3') rate(Rating.Good);
-        else if (e.key === '4') rate(Rating.Easy);
+        else if (e.key === '2') advanceCard(Rating.Hard);
+        else if (e.key === '3') advanceCard(Rating.Good);
+        else if (e.key === '4') advanceCard(Rating.Easy);
+      } else if (waitingForContinue && (e.key === ' ' || e.key === 'Enter')) {
+        e.preventDefault();
+        advanceCard(Rating.Again);
       }
     };
     document.addEventListener('keydown', handler, { once: false });
