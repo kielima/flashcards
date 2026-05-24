@@ -1,7 +1,7 @@
 {
   "name": "FSRS Flashcards",
   "short_name": "Flashcards",
-  "description": "Flashcards pessoais com algoritmo FSRS",
+  "description": "Flashcards pessoais com algoritmo FSRS para revisão espaçada",
   "start_url": "./index.html",
   "display": "standalone",
   "display_override": ["standalone", "browser"],
