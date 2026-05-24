@@ -28,6 +28,9 @@ export async function render(libraryId) {
       <button class="btn btn-primary review-cta${due > 0 ? ' visible' : ''}" id="review-btn">
         ▶ Revisar agora (${due} card${due !== 1 ? 's' : ''})
       </button>
+      <button class="btn btn-ghost" id="flashcard-btn" style="width:100%;border-radius:var(--radius)">
+        🃏 Modo flashcard
+      </button>
       <button class="btn btn-ghost" id="typing-btn" style="width:100%;border-radius:var(--radius)">
         ⌨ Modo digitação
       </button>
@@ -46,6 +49,10 @@ export async function render(libraryId) {
 
   document.getElementById('review-btn').addEventListener('click', () => {
     location.hash = `#/library/${libraryId}/review`;
+  });
+
+  document.getElementById('flashcard-btn').addEventListener('click', () => {
+    location.hash = `#/library/${libraryId}/flashcard`;
   });
 
   document.getElementById('typing-btn').addEventListener('click', () => {

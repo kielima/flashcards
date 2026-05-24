@@ -5,8 +5,15 @@ const container = () => document.getElementById('view-container');
 async function route() {
   const hash = location.hash || '#/';
 
+  // #/library/:id/flashcard
+  let m = hash.match(/^#\/library\/(\d+)\/flashcard$/);
+  if (m) {
+    const { render } = await import('./views/flashcard.js');
+    return render(m[1]);
+  }
+
   // #/library/:id/typing
-  let m = hash.match(/^#\/library\/(\d+)\/typing$/);
+  m = hash.match(/^#\/library\/(\d+)\/typing$/);
   if (m) {
     const { render } = await import('./views/typing.js');
     return render(m[1]);
