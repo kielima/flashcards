@@ -1,4 +1,4 @@
-import { getLibrary, listCards } from '../db.js';
+import { getLibrary, listCards, getReviewState } from '../db.js';
 import { renderInto } from '../components/card-renderer.js';
 import { setTitle } from '../ui.js';
 
@@ -10,7 +10,7 @@ export async function render(libraryId) {
 
   setTitle(`Digitação — ${lib.name}`);
 
-  const cards = shuffle(await listCards(libraryId));
+  const cards = await buildPriorityQueue(libraryId);
   if (!cards.length) {
     vc().innerHTML = `
       <div class="app-header">
@@ -160,6 +160,38 @@ export async function render(libraryId) {
 
   buildShell();
   showQuestion();
+}
+
+async function buildPriorityQueue(libraryId) {
+  const MAX_CARDS = 10;
+  const all = await listCards(libraryId);
+  const now = new Date();
+
+  const due = [];
+  const newCards = [];
+  const future = [];
+
+  for (const card of all) {
+    const review = await getReviewState(card.id);
+    if (!review || review.state === 0) {
+      newCards.push(card);
+    } else if (new Date(review.due) <= now) {
+      due.push({ card, due: new Date(review.due) });
+    } else {
+      future.push({ card, due: new Date(review.due) });
+    }
+  }
+
+  due.sort((a, b) => a.due - b.due);
+  future.sort((a, b) => a.due - b.due);
+
+  const prioritized = [
+    ...due.map(x => x.card),
+    ...shuffle(newCards),
+    ...future.map(x => x.card),
+  ];
+
+  return prioritized.slice(0, MAX_CARDS);
 }
 
 function checkAnswer(typed, backText) {
