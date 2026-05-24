@@ -1,0 +1,63 @@
+name: Auto Merge
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    # Only act on successful CI runs that are NOT on the default branch
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch != 'main'
+    steps:
+      - name: Find and squash-merge PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const run = context.payload.workflow_run;
+
+            core.info(`CI passed — branch: "${run.head_branch}", sha: "${run.head_sha}"`);
+
+            // List open PRs whose head is this branch.
+            // The branch filter is sufficient; we avoid a strict SHA match because
+            // pull_request-triggered CI runs on a temporary merge commit, so
+            // run.head_sha may differ from pr.head.sha.
+            const { data: prs } = await github.rest.pulls.list({
+              owner, repo,
+              state: 'open',
+              head: `${owner}:${run.head_branch}`,
+              per_page: 5,
+            });
+
+            if (prs.length === 0) {
+              core.info(`No open PR found for branch "${run.head_branch}" — nothing to do`);
+              return;
+            }
+
+            // Prefer exact SHA match (push-triggered CI); fall back to first PR.
+            const pr = prs.find(p => p.head.sha === run.head_sha) ?? prs[0];
+
+            if (pr.draft) {
+              core.info(`PR #${pr.number} is a draft — skipping`);
+              return;
+            }
+
+            core.info(`Squash-merging PR #${pr.number}: "${pr.title}"`);
+
+            await github.rest.pulls.merge({
+              owner, repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+              commit_title: `${pr.title} (#${pr.number})`,
+            });
+
+            core.info(`PR #${pr.number} merged successfully ✓`);

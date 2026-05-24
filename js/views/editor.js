@@ -33,9 +33,15 @@ export async function render(libraryId, cardId) {
       </div>
 
       <div class="editor-field">
-        <label>Verso</label>
+        <label>Resposta</label>
         <textarea class="textarea" id="back-input" rows="5" placeholder="Markdown e LaTeX suportados…">${escHtml(card?.back || '')}</textarea>
         <div id="back-preview" class="preview-box"></div>
+      </div>
+
+      <div class="editor-field">
+        <label>Explicação <span class="field-optional">(opcional)</span></label>
+        <textarea class="textarea" id="explanation-input" rows="4" placeholder="Aparece quando errar ou ao puxar para cima…">${escHtml(card?.explanation || '')}</textarea>
+        <div id="explanation-preview" class="preview-box"></div>
       </div>
 
       <div class="editor-field">
@@ -55,13 +61,13 @@ export async function render(libraryId, cardId) {
     </div>
   `;
 
-  // Current tags state
-  let currentTags = [...(card?.tags || [])];
-  renderTags(currentTags);
-
   // Tag input handling
   const tagInput = document.getElementById('tag-input');
   const wrapper = document.getElementById('tags-wrapper');
+
+  // Current tags state
+  let currentTags = [...(card?.tags || [])];
+  renderTags(currentTags);
 
   wrapper.addEventListener('click', () => tagInput.focus());
 
@@ -108,8 +114,10 @@ export async function render(libraryId, cardId) {
   // Live preview
   const frontInput = document.getElementById('front-input');
   const backInput = document.getElementById('back-input');
+  const explanationInput = document.getElementById('explanation-input');
   const frontPreview = document.getElementById('front-preview');
   const backPreview = document.getElementById('back-preview');
+  const explanationPreview = document.getElementById('explanation-preview');
 
   const updatePreview = (input, preview) => {
     renderInto(preview, input.value);
@@ -117,31 +125,39 @@ export async function render(libraryId, cardId) {
 
   frontInput.addEventListener('input', () => updatePreview(frontInput, frontPreview));
   backInput.addEventListener('input',  () => updatePreview(backInput,  backPreview));
+  explanationInput.addEventListener('input', () => updatePreview(explanationInput, explanationPreview));
 
   // Initial render
   if (card) {
     updatePreview(frontInput, frontPreview);
     updatePreview(backInput,  backPreview);
+    updatePreview(explanationInput, explanationPreview);
   }
 
   // Save
   document.getElementById('save-btn').addEventListener('click', async () => {
     const front = frontInput.value.trim();
     const back  = backInput.value.trim();
+    const explanation = explanationInput.value.trim();
     if (!front) { showToast('A frente do card é obrigatória', 'error'); return; }
 
     if (tagInput.value.trim()) addTag(tagInput.value.trim());
 
-    const data = { front, back, tags: currentTags, libraryId: Number(libraryId) };
+    const data = { front, back, explanation, tags: currentTags, libraryId: Number(libraryId) };
 
-    if (isEdit) {
-      await updateCard(cardId, data);
-      showToast('Card salvo');
-    } else {
-      await createCard(data);
-      showToast('Card criado!', 'success');
+    try {
+      if (isEdit) {
+        await updateCard(cardId, data);
+        showToast('Card salvo', 'success');
+      } else {
+        await createCard(data);
+        showToast('Card criado!', 'success');
+      }
+      location.hash = `#/library/${libraryId}`;
+    } catch (e) {
+      console.error('Erro ao salvar card:', e);
+      showToast('Erro ao salvar card', 'error');
     }
-    location.hash = `#/library/${libraryId}`;
   });
 
   // Delete

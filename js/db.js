@@ -157,6 +157,7 @@ export async function exportDeck(libraryId) {
     cards: cards.map(c => ({
       front: c.front,
       back: c.back,
+      explanation: c.explanation || '',
       tags: c.tags || []
     }))
   };
@@ -197,6 +198,7 @@ export async function importDeck(data, mode = 'new') {
       libraryId,
       front: card.front,
       back: card.back,
+      explanation: card.explanation || '',
       tags: card.tags || []
     });
   }
@@ -230,28 +232,12 @@ export async function importBackup(data) {
 export async function seedIfEmpty() {
   const count = await db.libraries.count();
   if (count > 0) return;
-
-  const libraryId = await createLibrary({
-    name: 'HSK 1 — Mandarim Básico',
-    description: 'Primeiros caracteres do nível HSK 1',
-    icon: '🀄',
-    color: '#c0392b'
-  });
-
-  const sampleCards = [
-    { front: '# 你好\n*(nǐ hǎo)*', back: '**Olá** / Oi\n\n*Segunda sílaba tem tom descendente-ascendente (3º tom).*', tags: ['saudações', 'hsk1'] },
-    { front: '# 谢谢\n*(xiè xiè)*', back: '**Obrigado(a)**\n\n*Ambas as sílabas têm 4º tom (descendente).*', tags: ['cortesia', 'hsk1'] },
-    { front: '# 再见\n*(zài jiàn)*', back: '**Tchau / Até logo**\n\n*Literalmente: "encontrar novamente"*', tags: ['saudações', 'hsk1'] },
-    { front: '# 是\n*(shì)*', back: '**Ser / Estar / Sim**\n\n*Verbo cópula — equivale a "é/são" em frases de identificação.*', tags: ['verbos', 'hsk1'] },
-    { front: '# 不\n*(bù)*', back: '**Não** (negação)\n\n*Tom 4 normalmente; vira tom 2 (bú) antes de outro tom 4.*', tags: ['gramática', 'hsk1'] },
-    { front: '# 我\n*(wǒ)*', back: '**Eu / Me / Mim**\n\n*Pronome pessoal de 1ª pessoa singular.*', tags: ['pronomes', 'hsk1'] },
-    { front: '# 你\n*(nǐ)*', back: '**Você / Tu**\n\n*Pronome de 2ª pessoa. Forma de respeito: 您 (nín).*', tags: ['pronomes', 'hsk1'] },
-    { front: '# 好\n*(hǎo)*', back: '**Bom / Bem / Ok**\n\n*Também usado para responder afirmativamente.*', tags: ['adjetivos', 'hsk1'] },
-    { front: '# 一\n*(yī)*', back: '**Um / 1**\n\n*Tom muda conforme o caractere seguinte: yi1, yi2 ou yi4.*', tags: ['números', 'hsk1'] },
-    { front: '# 人\n*(rén)*', back: '**Pessoa / Ser humano**\n\n*Radical muito comum em caracteres relacionados a pessoas.*', tags: ['substantivos', 'hsk1'] },
-  ];
-
-  for (const card of sampleCards) {
-    await createCard({ ...card, libraryId });
+  try {
+    const res = await fetch('./decks/hsk1-mandarim.deck.json');
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    await importDeck(data, 'new');
+  } catch {
+    // Silently skip seed if file is unreachable (e.g. file:// protocol)
   }
 }

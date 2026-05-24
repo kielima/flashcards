@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          find . -name "*.js" -not -path "./.git/*" | while read f; do
+            echo "Checking $f"
+            node --check "$f" || exit 1
+          done
+
+      - name: Validate JSON files
+        run: |
+          find . -name "*.json" -not -path "./.git/*" | while read f; do
+            echo "Validating $f"
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" || exit 1
+          done
+
+      - name: Validate HTML structure
+        run: |
+          python3 -c "
+          from html.parser import HTMLParser
+          import sys
+
+          class StrictParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.stack = []
+                  self.errors = []
+                  self.void_elements = {
+                      'area','base','br','col','embed','hr','img','input',
+                      'link','meta','param','source','track','wbr'
+                  }
+              def handle_starttag(self, tag, attrs):
+                  if tag not in self.void_elements:
+                      self.stack.append(tag)
+              def handle_endtag(self, tag):
+                  if tag in self.void_elements:
+                      return
+                  if self.stack and self.stack[-1] == tag:
+                      self.stack.pop()
+                  else:
+                      self.errors.append(f'Unexpected closing tag: </{tag}>')
+
+          with open('index.html','r') as f:
+              content = f.read()
+
+          parser = StrictParser()
+          parser.feed(content)
+
+          if parser.errors:
+              print('HTML errors:', parser.errors, file=sys.stderr)
+              sys.exit(1)
+
+          print('HTML validation passed')
+          "
+
+      - name: Check service worker scope
+        run: |
+          node -e "
+          const fs = require('fs');
+          const sw = fs.readFileSync('sw.js','utf8');
+          if (!sw.includes('addEventListener')) {
+            console.error('Service worker missing event listeners');
+            process.exit(1);
+          }
+          console.log('Service worker looks valid');
+          "
