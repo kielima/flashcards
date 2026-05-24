@@ -1,0 +1,52 @@
+name: Auto Merge
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.workflow_run.head_sha;
+            const headBranch = context.payload.workflow_run.head_branch;
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner, repo,
+              state: 'open',
+              head: `${owner}:${headBranch}`,
+            });
+
+            const pr = prs.find(p => p.head.sha === headSha);
+
+            if (!pr) {
+              console.log('No open PR found for this workflow run');
+              return;
+            }
+
+            if (pr.draft) {
+              console.log(`PR #${pr.number} is a draft — skipping`);
+              return;
+            }
+
+            console.log(`Merging PR #${pr.number}: ${pr.title}`);
+
+            await github.rest.pulls.merge({
+              owner, repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+              commit_title: `${pr.title} (#${pr.number})`,
+            });
+
+            console.log(`PR #${pr.number} merged successfully via squash`);
