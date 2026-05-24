@@ -4,6 +4,7 @@
   "description": "Flashcards pessoais com algoritmo FSRS",
   "start_url": "./index.html",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
   "background_color": "#0f0f13",
   "theme_color": "#5B6EF5",
   "icons": [
@@ -11,3 +12,4 @@
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
+
