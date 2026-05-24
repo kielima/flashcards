@@ -1054,6 +1054,17 @@ body {
   margin: 18px 0;
 }
 
+/* Flashcard mode rating row */
+.flashcard-rating-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.flashcard-rating-row .rating-btn {
+  padding: 14px 8px;
+  font-size: 15px;
+}
+
 /* ── Responsive ─────────────────────────────────────── */
 @media (max-width: 360px) {
   .library-grid { grid-template-columns: 1fr 1fr; }
