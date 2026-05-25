@@ -8,7 +8,6 @@ on:
 permissions:
   pull-requests: write
   contents: write
-  actions: write
 
 jobs:
   auto-merge:
@@ -28,10 +27,6 @@ jobs:
 
             core.info(`CI passed — branch: "${run.head_branch}", sha: "${run.head_sha}"`);
 
-            // List open PRs whose head is this branch.
-            // The branch filter is sufficient; we avoid a strict SHA match because
-            // pull_request-triggered CI runs on a temporary merge commit, so
-            // run.head_sha may differ from pr.head.sha.
             const { data: prs } = await github.rest.pulls.list({
               owner, repo,
               state: 'open',
@@ -44,7 +39,6 @@ jobs:
               return;
             }
 
-            // Prefer exact SHA match (push-triggered CI); fall back to first PR.
             const pr = prs.find(p => p.head.sha === run.head_sha) ?? prs[0];
 
             if (pr.draft) {
@@ -62,12 +56,3 @@ jobs:
             });
 
             core.info(`PR #${pr.number} merged successfully ✓`);
-
-            // Dispatch the deploy workflow because merges via GITHUB_TOKEN
-            // do not trigger push-based workflow events on main.
-            await github.rest.actions.createWorkflowDispatch({
-              owner, repo,
-              workflow_id: 'deploy.yml',
-              ref: 'main',
-            });
-            core.info('Deploy workflow dispatched ✓');
