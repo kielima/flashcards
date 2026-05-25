@@ -20,7 +20,7 @@ export async function render(libraryId) {
       <div class="review-complete">
         <div class="complete-icon">🃏</div>
         <h2>Nenhum card ainda</h2>
-        <p>Adicione cards à biblioteca antes de praticar.</p>
+        <p>Adicione cards à deck antes de praticar.</p>
         <a href="#/library/${libraryId}" class="btn btn-primary">Voltar</a>
       </div>`;
     return;
@@ -151,7 +151,7 @@ export async function render(libraryId) {
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px">
           <button class="btn btn-primary" id="retry-btn">Tentar novamente</button>
-          <a href="#/library/${libraryId}" class="btn btn-ghost">Voltar à biblioteca</a>
+          <a href="#/library/${libraryId}" class="btn btn-ghost">Voltar à deck</a>
         </div>
       </div>`;
 

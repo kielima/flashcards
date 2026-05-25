@@ -23,7 +23,7 @@ export async function render(libraryId) {
         <div class="complete-icon">✅</div>
         <h2>Nada para revisar!</h2>
         <p>Todos os cards estão em dia. Volte mais tarde.</p>
-        <a href="#/library/${libraryId}" class="btn btn-primary">Voltar à biblioteca</a>
+        <a href="#/library/${libraryId}" class="btn btn-primary">Voltar à deck</a>
       </div>
     `;
     return;
@@ -217,7 +217,7 @@ export async function render(libraryId) {
           ${results.good  ? `<span class="stat-chip good">Good: ${results.good}</span>` : ''}
           ${results.easy  ? `<span class="stat-chip easy">Easy: ${results.easy}</span>` : ''}
         </div>
-        <a href="#/library/${libraryId}" class="btn btn-primary">Voltar à biblioteca</a>
+        <a href="#/library/${libraryId}" class="btn btn-primary">Voltar à deck</a>
       </div>
     `;
   }

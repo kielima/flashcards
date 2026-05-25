@@ -156,9 +156,9 @@ async function renderStats(libraryId) {
 async function openMenu(lib, libraryId) {
   const result = await showModal({
     menuItems: [
-      { icon: '✏️', label: 'Editar biblioteca',  value: 'edit' },
+      { icon: '✏️', label: 'Editar deck',  value: 'edit' },
       { icon: '📤', label: 'Exportar deck',       value: 'export' },
-      { icon: '🗑️', label: 'Excluir biblioteca',  value: 'delete', danger: true },
+      { icon: '🗑️', label: 'Excluir deck',  value: 'delete', danger: true },
       { icon: '✕',  label: 'Cancelar',            value: null,     cancel: true }
     ]
   });
@@ -173,7 +173,7 @@ async function openMenu(lib, libraryId) {
     showToast('Deck exportado!', 'success');
   } else if (result === 'delete') {
     const confirm = await showModal({
-      title: 'Excluir biblioteca?',
+      title: 'Excluir deck?',
       body: `<p style="color:var(--text-secondary);font-size:14px">Isso excluirá "<strong>${escHtml(lib.name)}</strong>" e todos os seus cards e histórico de revisões. Esta ação não pode ser desfeita.</p>`,
       buttons: [
         { label: 'Cancelar', className: 'btn-ghost', value: null },
@@ -182,7 +182,7 @@ async function openMenu(lib, libraryId) {
     });
     if (confirm === 'delete') {
       await deleteLibrary(libraryId);
-      showToast('Biblioteca excluída');
+      showToast('Deck excluída');
       location.hash = '#/';
     }
   }

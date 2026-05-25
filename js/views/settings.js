@@ -21,7 +21,7 @@ export async function render() {
         <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-label">
-              <strong>Biblioteca</strong>
+              <strong>Deck</strong>
               <span>Selecione qual exportar</span>
             </div>
             <select class="input select" id="export-deck-select" style="width:auto;min-width:140px"></select>
@@ -57,7 +57,7 @@ export async function render() {
           <div class="settings-row">
             <div class="settings-row-label">
               <strong>Exportar tudo</strong>
-              <span>Todas as bibliotecas, cards e histórico de revisões</span>
+              <span>Todas as decks, cards e histórico de revisões</span>
             </div>
             <button class="btn btn-ghost btn-sm" id="export-backup-btn">Backup</button>
           </div>
@@ -107,7 +107,7 @@ async function loadExportSelect() {
   if (!sel) return;
   const libs = await listLibraries();
   sel.innerHTML = libs.map(l => `<option value="${l.id}">${escHtml(l.name)}</option>`).join('') ||
-    '<option value="">Nenhuma biblioteca</option>';
+    '<option value="">Nenhuma deck</option>';
 }
 
 let importDeckData = null;
@@ -116,7 +116,7 @@ function bindEvents() {
   // Export deck
   document.getElementById('export-deck-btn').addEventListener('click', async () => {
     const sel = document.getElementById('export-deck-select');
-    if (!sel.value) { showToast('Nenhuma biblioteca disponível', 'error'); return; }
+    if (!sel.value) { showToast('Nenhuma deck disponível', 'error'); return; }
     const libs = await listLibraries();
     const lib = libs.find(l => l.id == sel.value);
     const data = await exportDeck(sel.value);
@@ -150,8 +150,8 @@ function bindEvents() {
     let mode = 'new';
     if (sameName) {
       const choice = await showModal({
-        title: 'Biblioteca já existe',
-        body: `<p style="color:var(--text-secondary);font-size:14px">Já existe uma biblioteca chamada "<strong>${escHtml(importDeckData.library.name)}</strong>". Como deseja importar?</p>`,
+        title: 'Deck já existe',
+        body: `<p style="color:var(--text-secondary);font-size:14px">Já existe uma deck chamada "<strong>${escHtml(importDeckData.library.name)}</strong>". Como deseja importar?</p>`,
         buttons: [
           { label: 'Cancelar', className: 'btn-ghost', value: null },
           { label: 'Importar como nova', className: 'btn-ghost', value: 'new' },
@@ -193,7 +193,7 @@ function bindEvents() {
     if (!file) return;
     const confirm = await showModal({
       title: 'Restaurar backup?',
-      body: '<p style="color:var(--text-secondary);font-size:14px">Isso substituirá <strong>todos</strong> os dados atuais (bibliotecas, cards e histórico). Esta ação não pode ser desfeita.</p>',
+      body: '<p style="color:var(--text-secondary);font-size:14px">Isso substituirá <strong>todos</strong> os dados atuais (decks, cards e histórico). Esta ação não pode ser desfeita.</p>',
       buttons: [
         { label: 'Cancelar', className: 'btn-ghost', value: null },
         { label: 'Restaurar', className: 'btn-danger', value: 'restore' }
@@ -250,7 +250,7 @@ function showDeckPreview(data) {
 
 function validateDeck(data) {
   if (data.version !== 1) return 'Versão do arquivo não suportada';
-  if (!data.library?.name?.trim()) return 'Nome da biblioteca ausente';
+  if (!data.library?.name?.trim()) return 'Nome da deck ausente';
   if (!Array.isArray(data.cards)) return 'Formato de cards inválido';
   for (const c of data.cards) {
     if (typeof c.front !== 'string' || typeof c.back !== 'string') return 'Card com frente ou verso inválido';

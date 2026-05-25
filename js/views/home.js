@@ -10,7 +10,7 @@ export async function render() {
   vc().innerHTML = `
     <div class="app-header">
       <h1>📚 Flashcards</h1>
-      <button class="btn btn-primary btn-sm" id="new-lib-btn">+ Nova Biblioteca</button>
+      <button class="btn btn-primary btn-sm" id="new-lib-btn">+ Nova Deck</button>
       <a href="#/settings" class="btn btn-icon" title="Configurações" style="font-size:20px;">⚙️</a>
     </div>
     <div class="home-container">
@@ -34,8 +34,8 @@ async function loadLibraries() {
     grid.innerHTML = `
       <div class="empty-state" style="grid-column:1/-1">
         <div class="empty-icon">📭</div>
-        <strong>Nenhuma biblioteca ainda</strong>
-        <p>Clique em "Nova Biblioteca" para começar.</p>
+        <strong>Nenhuma deck ainda</strong>
+        <p>Clique em "Nova Deck" para começar.</p>
       </div>
     `;
     return;
@@ -71,7 +71,7 @@ async function openCreateModal(libData = null) {
   ]);
 
   const result = await showModal({
-    title: isEdit ? 'Editar biblioteca' : 'Nova biblioteca',
+    title: isEdit ? 'Editar deck' : 'Nova deck',
     body: form,
     buttons: [
       { label: 'Cancelar', className: 'btn-ghost', value: null },
@@ -93,10 +93,10 @@ async function openCreateModal(libData = null) {
 
   if (isEdit) {
     await (await import('../db.js')).updateLibrary(libData.id, data);
-    showToast('Biblioteca atualizada');
+    showToast('Deck atualizada');
   } else {
     await createLibrary(data);
-    showToast('Biblioteca criada!', 'success');
+    showToast('Deck criada!', 'success');
   }
 
   await loadLibraries();
