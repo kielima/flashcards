@@ -8,6 +8,7 @@ on:
 permissions:
   pull-requests: write
   contents: write
+  actions: write
 
 jobs:
   auto-merge:
@@ -61,3 +62,12 @@ jobs:
             });
 
             core.info(`PR #${pr.number} merged successfully ✓`);
+
+            // Dispatch the deploy workflow because merges via GITHUB_TOKEN
+            // do not trigger push-based workflow events on main.
+            await github.rest.actions.createWorkflowDispatch({
+              owner, repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main',
+            });
+            core.info('Deploy workflow dispatched ✓');
