@@ -63,11 +63,10 @@ jobs:
 
             core.info(`PR #${pr.number} merged successfully ✓`);
 
-            // Dispatch the deploy workflow because merges via GITHUB_TOKEN
-            // do not trigger push-based workflow events on main.
-            await github.rest.actions.createWorkflowDispatch({
+            // Trigger deploy via repository_dispatch — workflow_dispatch is silently
+            // ignored when called with GITHUB_TOKEN in a workflow_run context.
+            await github.rest.repos.createDispatchEvent({
               owner, repo,
-              workflow_id: 'deploy.yml',
-              ref: 'main',
+              event_type: 'deploy',
             });
-            core.info('Deploy workflow dispatched ✓');
+            core.info('Deploy repository_dispatch sent ✓');
